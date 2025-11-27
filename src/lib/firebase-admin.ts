@@ -1,4 +1,10 @@
-import { cert, getApp, getApps, initializeApp, type App } from "firebase-admin/app";
+import {
+  cert,
+  getApp,
+  getApps,
+  initializeApp,
+  type App,
+} from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { firebaseAdminConfig } from "./config";
 
@@ -13,8 +19,8 @@ const adminApp: App | undefined = existingApp
         credential: cert({
           projectId,
           clientEmail,
-          privateKey: normalizedPrivateKey
-        })
+          privateKey: normalizedPrivateKey,
+        }),
       })
     : undefined;
 

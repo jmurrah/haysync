@@ -7,6 +7,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     calendarId: "joined-calendar-id",
     token,
-    message: "Join calendar placeholder"
+    message: "Join calendar placeholder",
   });
 }

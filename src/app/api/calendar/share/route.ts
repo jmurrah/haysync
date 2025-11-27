@@ -10,6 +10,6 @@ export async function POST(request: Request) {
     token,
     calendarId,
     shareLink,
-    message: "Share token generation placeholder"
+    message: "Share token generation placeholder",
   });
 }
