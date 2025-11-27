@@ -3,7 +3,9 @@ import { adminApp } from "./firebase-admin";
 
 const adminAuth = adminApp ? getAuth(adminApp) : undefined;
 
-export async function verifyIdToken(token: string): Promise<DecodedIdToken | null> {
+export async function verifyIdToken(
+  token: string,
+): Promise<DecodedIdToken | null> {
   if (!adminAuth) {
     // TODO: Ensure Firebase Admin SDK is configured before verifying tokens
     return null;

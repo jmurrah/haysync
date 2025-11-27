@@ -1,15 +1,6 @@
-import CalendarList from "@/features/calendar/components/CalendarList";
-import CalendarView from "@/features/calendar/components/CalendarView";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  const userId = "placeholder-user";
-  const calendarId = "placeholder-calendar";
-
-  return (
-    <main>
-      <h1>Dashboard placeholder</h1>
-      <CalendarList userId={userId} />
-      <CalendarView calendarId={calendarId} />
-    </main>
-  );
+  // Redirect old dashboard path to the project root (signed-in default)
+  redirect("/");
 }

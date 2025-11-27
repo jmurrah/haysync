@@ -7,6 +7,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     calendarId: "dummy-calendar-id",
     name,
-    message: "Calendar creation placeholder"
+    message: "Calendar creation placeholder",
   });
 }

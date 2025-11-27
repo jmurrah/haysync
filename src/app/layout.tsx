@@ -9,7 +9,7 @@ type RootLayoutProps = {
 
 export const metadata: Metadata = {
   title: "Haysync",
-  description: "Shared calendar collaboration scaffold"
+  description: "Shared calendar collaboration scaffold",
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
