@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import AuthCard from "@/features/auth/components/AuthCard";
+import AuthField from "@/features/auth/components/AuthField";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import Logo from "@/components/Logo";
 import { signInWithEmail } from "@/features/auth/services/authClient";
@@ -49,23 +50,23 @@ export default function SignInPage() {
       >
         <form
           onSubmit={handleEmailSignIn}
-          className="flex flex-col gap-2 w-full"
+          className="flex flex-col gap-4 w-full"
         >
-          <label htmlFor="email">Email</label>
-          <input
+          <AuthField
             id="email"
+            label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={setEmail}
+            autoComplete="email"
           />
-          <label htmlFor="password">Password</label>
-          <input
+          <AuthField
             id="password"
+            label="Password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={setPassword}
+            autoComplete="current-password"
           />
           <Button type="submit" className="h-12 text-base">
             Sign in

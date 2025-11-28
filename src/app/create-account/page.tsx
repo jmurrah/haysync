@@ -7,6 +7,7 @@ import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { createAccountWithEmail } from "@/features/auth/services/authClient";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import AuthCard from "@/features/auth/components/AuthCard";
+import AuthField from "@/features/auth/components/AuthField";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import MessageDivider from "@/components/MessageDivider";
@@ -16,6 +17,7 @@ export default function CreateAccountPage() {
   const { user, loading } = useCurrentUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     if (!loading && user) {
@@ -28,6 +30,10 @@ export default function CreateAccountPage() {
   ) => {
     event.preventDefault();
     try {
+      if (password !== confirmPassword) {
+        // TODO: surface mismatch to the user
+        return;
+      }
       await createAccountWithEmail(email, password);
       router.replace("/");
     } catch (error) {
@@ -39,7 +45,7 @@ export default function CreateAccountPage() {
   return (
     <main className="h-full w-full flex justify-center items-center">
       <AuthCard
-        heading={<h1 className="text-4xl">Join haysync</h1>}
+        heading={<h1 className="text-4xl">Welcome to haysync</h1>}
         footer={
           <p>
             Already have an account?{" "}
@@ -51,23 +57,31 @@ export default function CreateAccountPage() {
       >
         <form
           onSubmit={handleCreateAccount}
-          className="flex flex-col gap-2 w-full"
+          className="flex flex-col gap-4 w-full"
         >
-          <label htmlFor="email">Email</label>
-          <input
+          <AuthField
             id="email"
+            label="Email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            onChange={setEmail}
+            autoComplete="email"
           />
-          <label htmlFor="password">Password</label>
-          <input
+          <AuthField
             id="password"
+            label="Password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={setPassword}
+            autoComplete="new-password"
+          />
+          <AuthField
+            id="confirm-password"
+            label="Confirm password"
+            type="password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            autoComplete="new-password"
           />
           <Button type="submit" className="h-12 text-base">
             Create account
