@@ -4,13 +4,17 @@ import { useCalendarEvents } from "../hooks/useCalendarEvents";
 
 type CalendarViewProps = {
   calendarId: string;
+  classes: string;
 };
 
-export default function CalendarView({ calendarId }: CalendarViewProps) {
+export default function CalendarView({
+  calendarId,
+  classes,
+}: CalendarViewProps) {
   const events = useCalendarEvents(calendarId);
 
   return (
-    <section>
+    <section className={classes}>
       <h2>Calendar events</h2>
       {events.length === 0 ? (
         <p>No events yet.</p>
