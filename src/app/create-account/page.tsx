@@ -8,6 +8,8 @@ import { createAccountWithEmail } from "@/features/auth/services/authClient";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import AuthCard from "@/features/auth/components/AuthCard";
 import Logo from "@/components/Logo";
+import { Button } from "@/components/ui/button";
+import MessageDivider from "@/components/MessageDivider";
 
 export default function CreateAccountPage() {
   const router = useRouter();
@@ -42,14 +44,14 @@ export default function CreateAccountPage() {
           <p>
             Already have an account?{" "}
             <Link href="/sign-in">
-              <span className="underline text-[var(--primary)]">Sign in</span>
+              <span className="underline-fill">Sign in</span>
             </Link>
           </p>
         }
       >
         <form
           onSubmit={handleCreateAccount}
-          className="flex flex-col gap-2 w-full px-4"
+          className="flex flex-col gap-2 w-full"
         >
           <label htmlFor="email">Email</label>
           <input
@@ -67,8 +69,11 @@ export default function CreateAccountPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Create account</button>
+          <Button type="submit" className="h-12 text-base">
+            Create account
+          </Button>
         </form>
+        <MessageDivider message="or" />
         <GoogleSignInButton />
       </AuthCard>
     </main>

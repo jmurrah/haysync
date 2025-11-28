@@ -2,6 +2,7 @@
 
 import { signInWithGoogle } from "../services/authClient";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function GoogleSignInButton() {
   const router = useRouter();
@@ -17,5 +18,13 @@ export default function GoogleSignInButton() {
     }
   };
 
-  return <button onClick={handleClick}>Sign in with Google</button>;
+  return (
+    <Button
+      onClick={handleClick}
+      className="flex w-full gap-2 justify-center items-center h-12"
+    >
+      <img src="/logos/google-icon.svg" />
+      <span className="text-base">Continue with Google</span>
+    </Button>
+  );
 }
