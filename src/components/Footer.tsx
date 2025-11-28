@@ -1,11 +1,16 @@
-import LayoutContainer from "./LayoutContainer";
+type FooterProps = React.HTMLAttributes<HTMLElement>;
 
-export default function Footer() {
+export default function Footer(props: FooterProps) {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="w-full flex justify-center items-center w-fill border-t-2">
-      <LayoutContainer className="flex justify-center items-center">
-        <p>haysync footer placeholder</p>
-      </LayoutContainer>
+    <footer
+      className="w-full flex justify-center items-center w-fill py-2"
+      {...props}
+    >
+      <p className="text-sm text-[var(--text-muted)]">
+        © {year} hay<span className="italic">sync</span>
+      </p>
     </footer>
   );
 }

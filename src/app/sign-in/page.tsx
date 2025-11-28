@@ -38,7 +38,11 @@ export default function SignInPage() {
   return (
     <main className="h-full w-full flex justify-center items-center">
       <AuthCard
-        heading={<h1 className="text-4xl">Sign in to haysync</h1>}
+        heading={
+          <h1 className="text-4xl">
+            Sign in to hay<span className="italic">sync</span>
+          </h1>
+        }
         footer={
           <p>
             Don't have an account?{" "}

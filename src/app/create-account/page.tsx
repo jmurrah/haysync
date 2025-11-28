@@ -18,6 +18,7 @@ export default function CreateAccountPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) {
@@ -31,21 +32,27 @@ export default function CreateAccountPage() {
     event.preventDefault();
     try {
       if (password !== confirmPassword) {
-        // TODO: surface mismatch to the user
+        setError("Passwords do not match");
         return;
       }
+      setError(null);
       await createAccountWithEmail(email, password);
       router.replace("/");
     } catch (error) {
       // TODO: add user-facing error feedback
       console.error("Account creation failed", error);
+      setError("Account creation failed");
     }
   };
 
   return (
     <main className="h-full w-full flex justify-center items-center">
       <AuthCard
-        heading={<h1 className="text-4xl">Welcome to haysync</h1>}
+        heading={
+          <h1 className="text-4xl">
+            Welcome to hay<span className="italic">sync</span>
+          </h1>
+        }
         footer={
           <p>
             Already have an account?{" "}
@@ -83,6 +90,7 @@ export default function CreateAccountPage() {
             onChange={setConfirmPassword}
             autoComplete="new-password"
           />
+          {error ? <p className="text-red-600 text-sm">{error}</p> : null}
           <Button type="submit" className="h-12 text-base">
             Create account
           </Button>
