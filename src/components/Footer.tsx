@@ -1,9 +1,11 @@
+import LayoutContainer from "./LayoutContainer";
+
 export default function Footer() {
   return (
     <footer className="w-full flex justify-center items-center w-fill border-t-2">
-      <div className="flex justify-center items-center w-10/12">
+      <LayoutContainer className="flex justify-center items-center">
         <p>haysync footer placeholder</p>
-      </div>
+      </LayoutContainer>
     </footer>
   );
 }

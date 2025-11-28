@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LayoutContainer from "@/components/LayoutContainer";
 import "./globals.css";
 
 type RootLayoutProps = {
@@ -18,9 +19,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>
+      <body className="h-screen flex flex-col justify-center items-center">
         <Header />
-        {children}
+        <main className="flex-1">
+          <LayoutContainer>{children}</LayoutContainer>
+        </main>
         <Footer />
       </body>
     </html>

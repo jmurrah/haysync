@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import { createAccountWithEmail } from "@/features/auth/services/authClient";
 import GoogleSignInButton from "@/features/auth/components/GoogleSignInButton";
 import AuthCard from "@/features/auth/components/AuthCard";
-import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import Logo from "@/components/Logo";
-import { signInWithEmail } from "@/features/auth/services/authClient";
 
-export default function SignInPage() {
+export default function CreateAccountPage() {
   const router = useRouter();
   const { user, loading } = useCurrentUser();
   const [email, setEmail] = useState("");
@@ -21,34 +21,34 @@ export default function SignInPage() {
     }
   }, [loading, router, user]);
 
-  const handleEmailSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateAccount = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
     try {
-      await signInWithEmail(email, password);
+      await createAccountWithEmail(email, password);
       router.replace("/");
     } catch (error) {
       // TODO: add user-facing error feedback
-      console.error("Email sign-in failed", error);
+      console.error("Account creation failed", error);
     }
   };
 
   return (
     <main className="h-full w-full flex justify-center items-center">
       <AuthCard
-        heading={<h1 className="text-4xl">Sign in to haysync</h1>}
+        heading={<h1 className="text-4xl">Join haysync</h1>}
         footer={
           <p>
-            Don't have an account?{" "}
-            <Link href="/create-account">
-              <span className="underline text-[var(--primary)]">
-                Create an account
-              </span>
+            Already have an account?{" "}
+            <Link href="/sign-in">
+              <span className="underline text-[var(--primary)]">Sign in</span>
             </Link>
           </p>
         }
       >
         <form
-          onSubmit={handleEmailSignIn}
+          onSubmit={handleCreateAccount}
           className="flex flex-col gap-2 w-full px-4"
         >
           <label htmlFor="email">Email</label>
@@ -67,7 +67,7 @@ export default function SignInPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Sign in</button>
+          <button type="submit">Create account</button>
         </form>
         <GoogleSignInButton />
       </AuthCard>

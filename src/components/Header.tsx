@@ -1,15 +1,18 @@
 import ThemeToggle from "./ThemeToggle";
+import SignOutButton from "@/features/auth/components/SignOutButton";
+import Logo from "./Logo";
+import LayoutContainer from "./LayoutContainer";
 
 export default function Header() {
   return (
     <header className="flex justify-center items-center w-full border-b-2">
-      <div className="flex justify-between items-center w-10/12">
-        <h1 className="text-5xl">
-          <span className="text-[var(--logo-hay)]">hay</span>
-          <span className="text-[var(--primary)] font-bold">sync</span>
-        </h1>
-        <ThemeToggle />
-      </div>
+      <LayoutContainer className="flex justify-between items-center">
+        <Logo size="48px" />
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <SignOutButton />
+        </div>
+      </LayoutContainer>
     </header>
   );
 }
