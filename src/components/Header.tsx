@@ -1,8 +1,29 @@
-export default function Header() {
+"use client";
+
+import ThemeToggle from "./ThemeToggle";
+import SignOutButton from "@/features/auth/components/SignOutButton";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+
+type HeaderProps = React.HTMLAttributes<HTMLElement>;
+
+export default function Header(props: HeaderProps) {
+  const { user } = useCurrentUser();
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <header>
-      <h1>Haysync</h1>
-      <p>Shared calendar collaboration (placeholder)</p>
+    <header className="w-full flex justify-center items-center" {...props}>
+      <div className="flex items-center justify-between p-4 w-10/12">
+        <div className="flex-1">
+          <ThemeToggle />
+        </div>
+        <div className="flex-1 flex justify-center" />
+        <div className="flex-1 flex justify-end">
+          {user ? <SignOutButton /> : null}
+        </div>
+      </div>
     </header>
   );
 }
