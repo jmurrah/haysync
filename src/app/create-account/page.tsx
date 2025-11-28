@@ -39,9 +39,10 @@ export default function CreateAccountPage() {
       await createAccountWithEmail(email, password);
       router.replace("/");
     } catch (error) {
-      // TODO: add user-facing error feedback
+      const message =
+        error instanceof Error ? error.message : "Account creation failed";
       console.error("Account creation failed", error);
-      setError("Account creation failed");
+      setError(message);
     }
   };
 

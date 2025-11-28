@@ -21,9 +21,9 @@ export default function DashboardPage() {
 
   if (!user && loading) {
     return (
-      <main>
+      <div className="flex justify-center items-center h-full w-full">
         <p>Checking authentication...</p>
-      </main>
+      </div>
     );
   }
 
@@ -32,10 +32,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <main>
-      {/* <h1>haysync dashboard</h1> */}
+    <div className="flex justify-center items-center h-full w-full">
       <CalendarList userId={userId} />
       <CalendarView calendarId={calendarId} />
-    </main>
+    </div>
   );
 }

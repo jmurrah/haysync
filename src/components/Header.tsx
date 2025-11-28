@@ -14,8 +14,8 @@ export default function Header(props: HeaderProps) {
   }
 
   return (
-    <header className="w-full" {...props}>
-      <div className="flex items-center justify-between px-4 py-2">
+    <header className="w-full flex justify-center items-center" {...props}>
+      <div className="flex items-center justify-between p-4 w-10/12">
         <div className="flex-1">
           <ThemeToggle />
         </div>

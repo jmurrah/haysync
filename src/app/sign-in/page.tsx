@@ -17,6 +17,7 @@ export default function SignInPage() {
   const { user, loading } = useCurrentUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -27,13 +28,23 @@ export default function SignInPage() {
   const handleEmailSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
+      setSubmitting(true);
       await signInWithEmail(email, password);
       router.replace("/");
     } catch (error) {
       // TODO: add user-facing error feedback
       console.error("Email sign-in failed", error);
+      setSubmitting(false);
     }
   };
+
+  if (loading || user || submitting) {
+    return (
+      <main className="h-screen w-full flex items-center justify-center">
+        <p>Signing you in...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="h-full w-full flex justify-center items-center">
@@ -77,7 +88,10 @@ export default function SignInPage() {
           </Button>
         </form>
         <MessageDivider message="or" />
-        <GoogleSignInButton />
+        <GoogleSignInButton
+          onStarted={() => setSubmitting(true)}
+          onSettled={() => setSubmitting(false)}
+        />
       </AuthCard>
     </main>
   );
