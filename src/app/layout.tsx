@@ -8,8 +8,11 @@ type RootLayoutProps = {
 };
 
 export const metadata: Metadata = {
-  title: "Haysync",
+  title: "haysync",
   description: "Shared calendar collaboration scaffold",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
