@@ -19,11 +19,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className="min-h-screen h-screen flex flex-col">
+      <body className="min-h-screen h-screen flex flex-col max-w-7xl mx-auto px-8">
         <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <LayoutContainer>{children}</LayoutContainer>
-        </main>
         <main className="flex-1 flex items-center justify-center">
           <LayoutContainer>{children}</LayoutContainer>
         </main>
