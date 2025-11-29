@@ -5,7 +5,7 @@ export default function Footer(props: FooterProps) {
 
   return (
     <footer
-      className="w-full flex justify-center items-center w-fill py-2"
+      className="w-full flex justify-center items-center w-fill py-4"
       {...props}
     >
       <p className="text-sm text-[var(--text-muted)]">

@@ -6,6 +6,7 @@ import { MonthView } from "./MonthView";
 import { WeekView } from "./WeekView";
 import {
   addDays,
+  addMinutes,
   buildMonthMatrix,
   buildWeek,
   formatMonthYear,
@@ -38,6 +39,10 @@ export function HaysyncCalendar({
   const [visibleDate, setVisibleDate] = useState<Date>(() =>
     normalizeDate(selectedDate),
   );
+  const [draftRange, setDraftRange] = useState<{
+    start: Date;
+    end: Date;
+  } | null>(null);
 
   useEffect(() => {
     setVisibleDate(normalizeDate(selectedDate));
@@ -91,6 +96,18 @@ export function HaysyncCalendar({
     }
   };
 
+  const openCreatePlaceholder = (range?: { start: Date; end: Date }) => {
+    if (range) {
+      setDraftRange(range);
+      return;
+    }
+    const base = normalizeDate(selectedDate);
+    base.setHours(9, 0, 0, 0);
+    setDraftRange({ start: base, end: addMinutes(base, 60) });
+  };
+
+  const closePlaceholder = () => setDraftRange(null);
+
   return (
     <div className="h-full w-full flex flex-col gap-3 rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-[var(--text)] shadow-none">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--card-border)] px-4 py-2 shadow-none">
@@ -99,27 +116,36 @@ export function HaysyncCalendar({
           <NavButton direction="next" onClick={() => handleNavigate("next")} />
           <p className="text-sm font-semibold">{headerLabel}</p>
         </div>
-        <div className="inline-flex overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium">
-          {(["month", "week"] as CalendarViewMode[]).map((mode, idx) => {
-            const isActive = viewMode === mode;
-            const base = "px-3 py-1.5";
-            const radius = idx === 0 ? "rounded-l-md" : "rounded-r-md";
-            const palette = isActive
-              ? "bg-[var(--bg)] text-[var(--text)]"
-              : "text-muted-foreground hover:bg-[var(--bg)]";
-            const label = mode[0].toUpperCase() + mode.slice(1);
-            return (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => handleViewSwitch(mode)}
-                className={`${base} ${radius} ${palette}`}
-                aria-pressed={isActive}
-              >
-                {label}
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <div className="inline-flex overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium">
+            {(["month", "week"] as CalendarViewMode[]).map((mode, idx) => {
+              const isActive = viewMode === mode;
+              const base = "px-3 py-1.5";
+              const radius = idx === 0 ? "rounded-l-md" : "rounded-r-md";
+              const palette = isActive
+                ? "bg-[var(--bg)] text-[var(--text)]"
+                : "text-muted-foreground hover:bg-[var(--bg)]";
+              const label = mode[0].toUpperCase() + mode.slice(1);
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => handleViewSwitch(mode)}
+                  className={`${base} ${radius} ${palette}`}
+                  aria-pressed={isActive}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={() => openCreatePlaceholder()}
+            className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--primary)]"
+          >
+            Add event
+          </button>
         </div>
       </div>
 
@@ -138,9 +164,13 @@ export function HaysyncCalendar({
             selectedDate={selectedDate}
             today={TODAY}
             onSelectDate={handleSelectDate}
+            onCreateRange={openCreatePlaceholder}
           />
         )}
       </div>
+      {draftRange ? (
+        <CreateEventPlaceholder range={draftRange} onClose={closePlaceholder} />
+      ) : null}
     </div>
   );
 }
@@ -163,5 +193,58 @@ function NavButton({
     >
       <Icon className="h-4 w-4" aria-hidden />
     </button>
+  );
+}
+
+function CreateEventPlaceholder({
+  range,
+  onClose,
+}: {
+  range: { start: Date; end: Date };
+  onClose: () => void;
+}) {
+  const startLabel = range.start.toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const endLabel = range.end.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+      <div className="w-full max-w-md rounded-lg border border-[var(--card-border)] bg-[var(--bg-light)] p-5 shadow-lg">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--text)]">
+              Create event (placeholder)
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {startLabel} – {endLabel}
+            </p>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-1.5 text-sm font-medium text-[var(--text)] hover:border-[var(--primary)]"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md bg-[var(--text)] px-3 py-1.5 text-sm font-semibold text-[var(--bg-light)]"
+          >
+            Create placeholder
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

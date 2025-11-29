@@ -12,6 +12,16 @@ export function addDays(date: Date, days: number) {
   return copy;
 }
 
+export function addMinutes(date: Date, minutes: number) {
+  const copy = new Date(date);
+  copy.setMinutes(copy.getMinutes() + minutes);
+  return copy;
+}
+
+export function startOfDay(date: Date) {
+  return normalizeDate(date);
+}
+
 export function startOfWeek(date: Date, weekStart = DEFAULT_WEEK_START) {
   const copy = normalizeDate(date);
   const day = copy.getDay(); // 0 (Sun) -> 6 (Sat)
@@ -82,6 +92,12 @@ export function formatDay(date: Date) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+export function formatHourLabel(hour: number) {
+  const period = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12} ${period}`;
 }
 
 export function dateKey(date: Date) {

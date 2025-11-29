@@ -18,7 +18,7 @@ export default function CalendarView({
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
 
   return (
-    <section className={`${classes} flex flex-col gap-4 text-left`}>
+    <section className={`${classes} flex flex-col gap-2 text-left`}>
       <div className="flex items-center justify-between">
         <h2 className="text-xl">Calendar</h2>
         <p className="text-xs text-muted-foreground">
