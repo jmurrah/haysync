@@ -165,6 +165,7 @@ export function HaysyncCalendar({
             today={TODAY}
             onSelectDate={handleSelectDate}
             onCreateRange={openCreatePlaceholder}
+            draftRange={draftRange}
           />
         )}
       </div>

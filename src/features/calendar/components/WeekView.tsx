@@ -14,11 +14,18 @@ type WeekViewProps = {
   today: Date;
   onSelectDate: (date: Date) => void;
   onCreateRange: (range: { start: Date; end: Date }) => void;
+  draftRange?: { start: Date; end: Date } | null;
 };
 
 type SlotPosition = {
   dayIndex: number;
   slotIndex: number; // 0-47 for each 30-minute block
+};
+
+type SlotSpan = {
+  dayIndex: number;
+  start: number; // inclusive slot index
+  end: number; // inclusive slot index
 };
 
 const HALF_HOUR_SLOTS = 48;
@@ -29,6 +36,7 @@ export function WeekView({
   today,
   onSelectDate,
   onCreateRange,
+  draftRange,
 }: WeekViewProps) {
   const slots = useMemo(
     () => Array.from({ length: HALF_HOUR_SLOTS }, (_, idx) => idx),
@@ -37,16 +45,20 @@ export function WeekView({
   const [dragStart, setDragStart] = useState<SlotPosition | null>(null);
   const [dragCurrent, setDragCurrent] = useState<SlotPosition | null>(null);
   const [hovered, setHovered] = useState<SlotPosition | null>(null);
+  const [lockedRange, setLockedRange] = useState<SlotSpan | null>(null);
   const isDragging = dragStart !== null;
 
-  // Palette driven by theme vars with sensible fallbacks.
-  const primary = "var(--primary, 221.2 83.2% 53.3%)";
+  // Palette driven by theme vars; `--primary` can be hex or hsl components.
+  const primary = "var(--primary, #01f9c6)";
+  const primaryMix = (percent: number) =>
+    `color-mix(in srgb, ${primary} ${percent}%, transparent)`;
   const baseBg = "var(--bg-light, #f8fafc)";
-  const hoverBg = `hsl(${primary} / 0.12)`;
-  const dragBg = `hsl(${primary} / 0.22)`;
-  const dragOutline = `hsl(${primary})`;
+  const hoverBg = primaryMix(22);
+  const dragBg = primaryMix(32);
+  const dragOutline = primary;
 
   const handleStart = useCallback((pos: SlotPosition) => {
+    setLockedRange(null);
     setDragStart(pos);
     setDragCurrent(pos);
     setHovered(pos);
@@ -66,8 +78,10 @@ export function WeekView({
     (pos?: SlotPosition) => {
       if (!dragStart) return;
       const target = pos ?? dragCurrent ?? dragStart;
-      const range = buildRange(dragStart, target, days);
-      if (range) {
+      const slotSpan = target ? toSlotSpan(dragStart, target) : null;
+      const range = target ? buildRange(dragStart, target, days) : null;
+      if (range && slotSpan) {
+        setLockedRange(slotSpan);
         onCreateRange(range);
         onSelectDate(range.start);
       }
@@ -91,13 +105,23 @@ export function WeekView({
     };
   }, [handleEnd, isDragging]);
 
-  const activeRange = useMemo(() => {
+  // Keep selection visible while the create placeholder is open.
+  useEffect(() => {
+    if (typeof draftRange === "undefined") return;
+    if (!draftRange) {
+      if (!isDragging) setLockedRange(null);
+      return;
+    }
+    const span = rangeToSlotSpan(draftRange, days);
+    setLockedRange(span);
+  }, [draftRange, days, isDragging]);
+
+  const dragRange = useMemo(() => {
     if (!dragStart || !dragCurrent) return null;
-    if (dragCurrent.dayIndex !== dragStart.dayIndex) return null;
-    const start = Math.min(dragStart.slotIndex, dragCurrent.slotIndex);
-    const end = Math.max(dragStart.slotIndex, dragCurrent.slotIndex);
-    return { dayIndex: dragStart.dayIndex, start, end };
+    return toSlotSpan(dragStart, dragCurrent);
   }, [dragCurrent, dragStart]);
+
+  const visibleRange = dragRange ?? lockedRange;
 
   return (
     <div className="flex h-full w-full select-none flex-col overflow-hidden">
@@ -158,16 +182,16 @@ export function WeekView({
               >
                 {slots.map((slot) => {
                   const selected =
-                    activeRange &&
-                    dayIndex === activeRange.dayIndex &&
-                    slot >= activeRange.start &&
-                    slot <= activeRange.end;
+                    visibleRange &&
+                    dayIndex === visibleRange.dayIndex &&
+                    slot >= visibleRange.start &&
+                    slot <= visibleRange.end;
                   const isHovered =
                     !selected &&
                     hovered?.dayIndex === dayIndex &&
                     hovered?.slotIndex === slot;
                   const baseClasses =
-                    "relative h-full w-full cursor-pointer bg-[var(--bg-light)] px-1 text-left transition-[background-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-border)]";
+                    "relative h-full w-full cursor-pointer bg-[var(--bg-light)] px-1 text-left transition-[background-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-border)]";
 
                   // Keep backgrounds inline so they are never overridden by Tailwind classes.
                   const backgroundColor = selected
@@ -178,7 +202,7 @@ export function WeekView({
 
                   const hoverShadow =
                     !selected && isHovered
-                      ? `inset 0 0 0 1px hsl(${primary} / 0.6)`
+                      ? `inset 0 0 0 1px ${primaryMix(60)}`
                       : undefined;
                   const selectionShadow = selected
                     ? `inset 0 0 0 1px ${dragOutline}, 0 0 0 1px ${dragOutline}`
@@ -223,6 +247,29 @@ export function WeekView({
       </div>
     </div>
   );
+}
+
+function toSlotSpan(start: SlotPosition, end: SlotPosition): SlotSpan | null {
+  if (start.dayIndex !== end.dayIndex) return null;
+  const firstSlot = Math.min(start.slotIndex, end.slotIndex);
+  const lastSlot = Math.max(start.slotIndex, end.slotIndex);
+  return { dayIndex: start.dayIndex, start: firstSlot, end: lastSlot };
+}
+
+function rangeToSlotSpan(
+  range: { start: Date; end: Date },
+  days: Date[],
+): SlotSpan | null {
+  if (!isSameDay(range.start, range.end)) return null;
+  const dayIndex = days.findIndex((day) => isSameDay(day, range.start));
+  if (dayIndex === -1) return null;
+
+  const startMinutes = range.start.getHours() * 60 + range.start.getMinutes();
+  const endMinutes = range.end.getHours() * 60 + range.end.getMinutes();
+  const startSlot = Math.floor(startMinutes / 30);
+  const endSlot = Math.max(startSlot, Math.ceil(endMinutes / 30) - 1);
+
+  return { dayIndex, start: startSlot, end: endSlot };
 }
 
 function buildRange(
