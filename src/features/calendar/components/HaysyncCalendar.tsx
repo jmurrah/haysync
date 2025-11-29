@@ -113,47 +113,39 @@ export function HaysyncCalendar({
   };
 
   return (
-    <div className="flex flex-col rounded-xl border bg-card text-foreground shadow-sm">
-      <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
-            Schedule
-          </p>
-          <p className="text-lg font-semibold leading-tight">{headerLabel}</p>
-        </div>
+    <div className="h-full flex flex-col gap-3 rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-[var(--text)] shadow-none">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--card-border)] px-4 py-2 shadow-none">
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center rounded-md border bg-transparent text-sm font-medium shadow-sm">
-            {(["month", "week", "day"] as CalendarViewMode[]).map((mode, i) => {
-              const isActive = viewMode === mode;
-              const label = mode[0].toUpperCase() + mode.slice(1);
-              const baseClasses =
-                "h-9 px-3 inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-              const radius =
-                i === 0
-                  ? "rounded-l-md"
-                  : i === 2
-                    ? "rounded-r-md"
-                    : "rounded-none";
+          <NavButton direction="prev" onClick={() => handleNavigate("prev")} />
+          <NavButton direction="next" onClick={() => handleNavigate("next")} />
+          <p className="text-sm font-semibold">{headerLabel}</p>
+        </div>
+        <div className="inline-flex overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium">
+          {(["month", "week", "day"] as CalendarViewMode[]).map((mode, idx) => {
+            const isActive = viewMode === mode;
+            const base = "px-3 py-1.5 transition-colors";
+            const radius =
+              idx === 0
+                ? "rounded-l-md"
+                : idx === 2
+                  ? "rounded-r-md"
+                  : "";
               const palette = isActive
-                ? "bg-[hsl(var(--primary)/0.12)] text-[var(--text)] border-l border-r border-[hsl(var(--primary)/0.3)]"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground";
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => handleViewSwitch(mode)}
-                  className={`${baseClasses} ${radius} ${palette}`}
-                  aria-pressed={isActive}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <NavButton direction="prev" onClick={() => handleNavigate("prev")} />
-            <NavButton direction="next" onClick={() => handleNavigate("next")} />
-          </div>
+                ? "bg-[var(--bg)] text-[var(--text)]"
+                : "text-muted-foreground hover:bg-[var(--bg)]";
+            const label = mode[0].toUpperCase() + mode.slice(1);
+            return (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleViewSwitch(mode)}
+                className={`${base} ${radius} ${palette}`}
+                aria-pressed={isActive}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -200,7 +192,7 @@ function MonthView({
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-2">
+      <div className="h-full grid grid-cols-7 gap-2">
         {matrix.flat().map((day, idx) => (
           <DayCell
             key={`${day.toISOString()}-${idx}`}
@@ -226,7 +218,7 @@ function WeekView({
   onSelectDate: (date: Date) => void;
 }) {
   return (
-    <div className="grid grid-cols-7 gap-2">
+    <div className="h-full grid grid-cols-7 gap-2">
       {days.map((day) => (
         <DayCell
           key={day.toISOString()}
@@ -244,18 +236,20 @@ function WeekView({
 function DayView({ date, events }: { date: Date; events: CalendarEvent[] }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded-lg border bg-muted/30 px-3 py-2">
+      <div className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-2">
         <p className="text-sm font-medium">{formatDay(date)}</p>
         <p className="text-xs text-muted-foreground">Schedule</p>
       </div>
       <div className="space-y-2">
         {events.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No events for this day.</p>
+          <p className="text-sm text-muted-foreground">
+            No events for this day.
+          </p>
         ) : (
           events.map((event) => (
             <div
               key={event.id}
-              className="rounded-lg border px-3 py-2 text-left shadow-sm"
+              className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-2 text-left"
             >
               <p className="text-sm font-medium text-[var(--text)]">
                 {event.title}
@@ -285,23 +279,22 @@ function DayCell({
   onSelectDate: (date: Date) => void;
 }) {
   const base =
-    "flex flex-col gap-1 rounded-lg border px-2 py-2 text-left transition-colors";
+    "flex flex-col gap-2 rounded-sm border border-[var(--card-border)] bg-[var(--bg-light)] px-2 py-2 text-left transition-colors";
   const emphasis = selected
-    ? "border-[hsl(var(--primary)/0.6)] bg-[hsl(var(--primary)/0.12)]"
-    : "hover:border-[hsl(var(--primary)/0.35)]";
+    ? "border-[var(--primary)]"
+    : "hover:border-[var(--primary)]";
   const muted = inCurrentMonth ? "" : "text-muted-foreground/70";
-  const todayBadge = isToday && !selected ? "border-[hsl(var(--primary)/0.6)]" : "";
 
   return (
     <button
       type="button"
       onClick={() => onSelectDate(date)}
-      className={`${base} ${emphasis} ${muted} ${todayBadge}`}
+      className={`${base} ${emphasis} ${muted}`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{date.getDate()}</span>
         {isToday ? (
-          <span className="rounded-full bg-[hsl(var(--primary)/0.12)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text)]">
+          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-[var(--text)]">
             Today
           </span>
         ) : null}
@@ -324,7 +317,7 @@ function NavButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium text-[var(--text)] transition-colors hover:border-[var(--primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--primary)]"
     >
       <Icon className="h-4 w-4" aria-hidden />
     </button>

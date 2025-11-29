@@ -2,10 +2,7 @@
 
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
 import { useState } from "react";
-import {
-  HaysyncCalendar,
-  type CalendarViewMode,
-} from "./HaysyncCalendar";
+import { HaysyncCalendar, type CalendarViewMode } from "./HaysyncCalendar";
 
 type CalendarViewProps = {
   calendarId: string;
