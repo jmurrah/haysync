@@ -12,7 +12,7 @@ export default function CalendarList({ userId, classes }: CalendarListProps) {
 
   return (
     <section className={classes}>
-      <h2>Your calendars</h2>
+      <h2 className="text-xl">Your calendars</h2>
       {calendars.length === 0 ? (
         <p>No calendars yet.</p>
       ) : (

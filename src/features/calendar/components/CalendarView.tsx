@@ -15,16 +15,8 @@ export default function CalendarView({
 
   return (
     <section className={classes}>
-      <h2>Calendar events</h2>
-      {events.length === 0 ? (
-        <p>No events yet.</p>
-      ) : (
-        <ul>
-          {events.map((event) => (
-            <li key={event.id}>{event.title}</li>
-          ))}
-        </ul>
-      )}
+      <h2 className="text-xl">Calendar</h2>
+      {/* <Calendar></Calendar> */}
     </section>
   );
 }

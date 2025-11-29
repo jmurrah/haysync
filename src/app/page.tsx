@@ -34,7 +34,10 @@ export default function DashboardPage() {
   return (
     <div className="flex justify-center items-center h-full w-full">
       <CalendarList userId={userId} classes="h-full w-48" />
-      <CalendarView calendarId={calendarId} classes="flex-1 h-full" />
+      <CalendarView
+        calendarId={calendarId}
+        classes="flex-1 h-full text-center"
+      />
     </div>
   );
 }
