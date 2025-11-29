@@ -142,7 +142,7 @@ export function HaysyncCalendar({
           <button
             type="button"
             onClick={() => openCreatePlaceholder()}
-            className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] transition-colors hover:border-[var(--primary)]"
+            className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-1.5 text-sm font-semibold text-[var(--text)] hover:border-[var(--primary)]"
           >
             Add event
           </button>

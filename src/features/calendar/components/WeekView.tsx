@@ -29,6 +29,8 @@ type SlotSpan = {
 };
 
 const HALF_HOUR_SLOTS = 48;
+const SLOT_HEIGHT = 48;
+const SLOT_GAP = 1;
 
 export function WeekView({
   days,
@@ -132,7 +134,7 @@ export function WeekView({
             key={day.toISOString()}
             type="button"
             onClick={() => onSelectDate(day)}
-            className={`flex h-full flex-col items-start gap-1 border-l border-[var(--card-border)] px-3 py-2 text-left transition-colors ${
+            className={`flex h-full flex-col items-start gap-1 border-l border-[var(--card-border)] px-3 py-2 text-left ${
               isSameDay(day, selectedDate)
                 ? "bg-[var(--bg)] text-[var(--text)]"
                 : "hover:bg-[var(--bg-light)]"
@@ -176,6 +178,22 @@ export function WeekView({
               key={day.toISOString()}
               className="relative bg-[var(--card-border)]"
             >
+              {visibleRange && visibleRange.dayIndex === dayIndex ? (
+                <div
+                  className="pointer-events-none absolute inset-x-0 z-10"
+                  style={{
+                    top: visibleRange.start * (SLOT_HEIGHT + SLOT_GAP) + "px",
+                    height:
+                      (visibleRange.end - visibleRange.start + 1) *
+                        SLOT_HEIGHT +
+                      (visibleRange.end - visibleRange.start) * SLOT_GAP +
+                      "px",
+                    backgroundColor: dragBg,
+                    boxShadow: `0 0 0 1px ${dragOutline}`,
+                    borderRadius: 0,
+                  }}
+                />
+              ) : null}
               <div
                 className="grid gap-px"
                 style={{ gridTemplateRows: "repeat(48, 48px)" }}
@@ -191,25 +209,15 @@ export function WeekView({
                     hovered?.dayIndex === dayIndex &&
                     hovered?.slotIndex === slot;
                   const baseClasses =
-                    "relative h-full w-full cursor-pointer bg-[var(--bg-light)] px-1 text-left transition-[background-color,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-border)]";
+                    "relative h-full w-full cursor-pointer bg-[var(--bg-light)] px-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--card-border)]";
 
-                  // Keep backgrounds inline so they are never overridden by Tailwind classes.
-                  const backgroundColor = selected
-                    ? dragBg
-                    : isHovered
-                      ? hoverBg
-                      : baseBg;
+                  // Keep backgrounds inline so hover is always visible; selection color now handled by overlay for seamless block.
+                  const backgroundColor = isHovered ? hoverBg : baseBg;
 
-                  const hoverShadow =
+                  const boxShadow =
                     !selected && isHovered
                       ? `inset 0 0 0 1px ${primaryMix(60)}`
                       : undefined;
-                  const selectionShadow = selected
-                    ? `inset 0 0 0 1px ${dragOutline}, 0 0 0 1px ${dragOutline}`
-                    : undefined;
-                  const boxShadow = [selectionShadow, hoverShadow]
-                    .filter(Boolean)
-                    .join(", ");
 
                   return (
                     <button
