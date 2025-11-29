@@ -20,7 +20,7 @@ export default function CalendarView({
   return (
     <section className={`${classes} flex flex-col gap-4 text-left`}>
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Calendar</h2>
+        <h2 className="text-xl">Calendar</h2>
         <p className="text-xs text-muted-foreground">
           {events.length} events loaded
         </p>

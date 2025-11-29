@@ -2,8 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { MonthView } from "./MonthView";
+import { WeekView } from "./WeekView";
+import {
+  addDays,
+  buildMonthMatrix,
+  buildWeek,
+  formatMonthYear,
+  formatWeekRange,
+  normalizeDate,
+  shiftMonth,
+  startOfMonth,
+  startOfWeek,
+  endOfWeek,
+} from "../utils/dateUtils";
 
-export type CalendarViewMode = "month" | "week" | "day";
+export type CalendarViewMode = "month" | "week";
 
 type HaysyncCalendarProps = {
   viewMode: CalendarViewMode;
@@ -12,31 +26,8 @@ type HaysyncCalendarProps = {
   onDateChange: (next: Date) => void;
 };
 
-type CalendarEvent = {
-  id: string;
-  title: string;
-  date: string; // YYYY-MM-DD
-  time?: string;
-};
-
 const WEEK_START = 1; // Monday
-
-const today = normalizeDate(new Date());
-const mockEvents: CalendarEvent[] = [
-  { id: "1", title: "Product sync", date: dateKey(today), time: "09:30" },
-  {
-    id: "2",
-    title: "Design review",
-    date: dateKey(addDays(today, 1)),
-    time: "13:00",
-  },
-  {
-    id: "3",
-    title: "1:1 catch-up",
-    date: dateKey(addDays(today, -2)),
-    time: "15:00",
-  },
-];
+const TODAY = normalizeDate(new Date());
 
 export function HaysyncCalendar({
   viewMode,
@@ -56,28 +47,20 @@ export function HaysyncCalendar({
     if (viewMode === "month") {
       return formatMonthYear(visibleDate);
     }
-    if (viewMode === "week") {
-      const start = startOfWeek(visibleDate);
-      const end = endOfWeek(visibleDate);
-      return formatWeekRange(start, end);
-    }
-    return formatDay(selectedDate);
-  }, [viewMode, visibleDate, selectedDate]);
+    const start = startOfWeek(visibleDate, WEEK_START);
+    const end = endOfWeek(visibleDate, WEEK_START);
+    return formatWeekRange(start, end);
+  }, [viewMode, visibleDate]);
 
   const currentWeek = useMemo(() => {
-    const start = startOfWeek(visibleDate);
+    const start = startOfWeek(visibleDate, WEEK_START);
     return buildWeek(start);
   }, [visibleDate]);
 
   const monthMatrix = useMemo(() => {
     if (viewMode !== "month") return [];
-    return buildMonthMatrix(visibleDate);
+    return buildMonthMatrix(visibleDate, WEEK_START);
   }, [visibleDate, viewMode]);
-
-  const dayEvents = useMemo(() => {
-    const key = dateKey(selectedDate);
-    return mockEvents.filter((event) => event.date === key);
-  }, [selectedDate]);
 
   const handleNavigate = (direction: "prev" | "next") => {
     const delta = direction === "next" ? 1 : -1;
@@ -85,10 +68,8 @@ export function HaysyncCalendar({
 
     if (viewMode === "month") {
       nextDate = shiftMonth(visibleDate, delta);
-    } else if (viewMode === "week") {
-      nextDate = addDays(startOfWeek(visibleDate), delta * 7);
     } else {
-      nextDate = addDays(visibleDate, delta);
+      nextDate = addDays(startOfWeek(visibleDate, WEEK_START), delta * 7);
     }
 
     setVisibleDate(nextDate);
@@ -105,15 +86,13 @@ export function HaysyncCalendar({
     onViewChange(mode);
     if (mode === "month") {
       setVisibleDate(startOfMonth(selectedDate));
-    } else if (mode === "week") {
-      setVisibleDate(startOfWeek(selectedDate));
     } else {
-      setVisibleDate(selectedDate);
+      setVisibleDate(startOfWeek(selectedDate, WEEK_START));
     }
   };
 
   return (
-    <div className="h-full flex flex-col gap-3 rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-[var(--text)] shadow-none">
+    <div className="h-full w-full flex flex-col gap-3 rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-[var(--text)] shadow-none">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--card-border)] px-4 py-2 shadow-none">
         <div className="flex items-center gap-2">
           <NavButton direction="prev" onClick={() => handleNavigate("prev")} />
@@ -121,18 +100,13 @@ export function HaysyncCalendar({
           <p className="text-sm font-semibold">{headerLabel}</p>
         </div>
         <div className="inline-flex overflow-hidden rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium">
-          {(["month", "week", "day"] as CalendarViewMode[]).map((mode, idx) => {
+          {(["month", "week"] as CalendarViewMode[]).map((mode, idx) => {
             const isActive = viewMode === mode;
-            const base = "px-3 py-1.5 transition-colors";
-            const radius =
-              idx === 0
-                ? "rounded-l-md"
-                : idx === 2
-                  ? "rounded-r-md"
-                  : "";
-              const palette = isActive
-                ? "bg-[var(--bg)] text-[var(--text)]"
-                : "text-muted-foreground hover:bg-[var(--bg)]";
+            const base = "px-3 py-1.5";
+            const radius = idx === 0 ? "rounded-l-md" : "rounded-r-md";
+            const palette = isActive
+              ? "bg-[var(--bg)] text-[var(--text)]"
+              : "text-muted-foreground hover:bg-[var(--bg)]";
             const label = mode[0].toUpperCase() + mode.slice(1);
             return (
               <button
@@ -149,157 +123,25 @@ export function HaysyncCalendar({
         </div>
       </div>
 
-      <div className="px-4 py-3">
+      <div className="px-4 py-3 flex-1 overflow-hidden min-h-0">
         {viewMode === "month" ? (
           <MonthView
             matrix={monthMatrix}
             selectedDate={selectedDate}
             onSelectDate={handleSelectDate}
             anchorMonth={startOfMonth(visibleDate)}
+            today={TODAY}
           />
-        ) : viewMode === "week" ? (
+        ) : (
           <WeekView
             days={currentWeek}
             selectedDate={selectedDate}
+            today={TODAY}
             onSelectDate={handleSelectDate}
           />
-        ) : (
-          <DayView date={selectedDate} events={dayEvents} />
         )}
       </div>
     </div>
-  );
-}
-
-function MonthView({
-  matrix,
-  selectedDate,
-  onSelectDate,
-  anchorMonth,
-}: {
-  matrix: Date[][];
-  selectedDate: Date;
-  anchorMonth: Date;
-  onSelectDate: (date: Date) => void;
-}) {
-  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
-        {weekDays.map((day) => (
-          <span key={day} className="py-2">
-            {day}
-          </span>
-        ))}
-      </div>
-      <div className="h-full grid grid-cols-7 gap-2">
-        {matrix.flat().map((day, idx) => (
-          <DayCell
-            key={`${day.toISOString()}-${idx}`}
-            date={day}
-            onSelectDate={onSelectDate}
-            selected={isSameDay(day, selectedDate)}
-            isToday={isSameDay(day, today)}
-            inCurrentMonth={isSameMonth(day, anchorMonth)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WeekView({
-  days,
-  selectedDate,
-  onSelectDate,
-}: {
-  days: Date[];
-  selectedDate: Date;
-  onSelectDate: (date: Date) => void;
-}) {
-  return (
-    <div className="h-full grid grid-cols-7 gap-2">
-      {days.map((day) => (
-        <DayCell
-          key={day.toISOString()}
-          date={day}
-          onSelectDate={onSelectDate}
-          selected={isSameDay(day, selectedDate)}
-          isToday={isSameDay(day, today)}
-          inCurrentMonth
-        />
-      ))}
-    </div>
-  );
-}
-
-function DayView({ date, events }: { date: Date; events: CalendarEvent[] }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-2">
-        <p className="text-sm font-medium">{formatDay(date)}</p>
-        <p className="text-xs text-muted-foreground">Schedule</p>
-      </div>
-      <div className="space-y-2">
-        {events.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No events for this day.
-          </p>
-        ) : (
-          events.map((event) => (
-            <div
-              key={event.id}
-              className="rounded-md border border-[var(--card-border)] bg-[var(--bg-light)] px-3 py-2 text-left"
-            >
-              <p className="text-sm font-medium text-[var(--text)]">
-                {event.title}
-              </p>
-              {event.time ? (
-                <p className="text-xs text-muted-foreground">{event.time}</p>
-              ) : null}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DayCell({
-  date,
-  selected,
-  isToday,
-  inCurrentMonth,
-  onSelectDate,
-}: {
-  date: Date;
-  selected: boolean;
-  isToday: boolean;
-  inCurrentMonth: boolean;
-  onSelectDate: (date: Date) => void;
-}) {
-  const base =
-    "flex flex-col gap-2 rounded-sm border border-[var(--card-border)] bg-[var(--bg-light)] px-2 py-2 text-left transition-colors";
-  const emphasis = selected
-    ? "border-[var(--primary)]"
-    : "hover:border-[var(--primary)]";
-  const muted = inCurrentMonth ? "" : "text-muted-foreground/70";
-
-  return (
-    <button
-      type="button"
-      onClick={() => onSelectDate(date)}
-      className={`${base} ${emphasis} ${muted}`}
-    >
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{date.getDate()}</span>
-        {isToday ? (
-          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-[var(--text)]">
-            Today
-          </span>
-        ) : null}
-      </div>
-    </button>
   );
 }
 
@@ -317,120 +159,9 @@ function NavButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium text-[var(--text)] transition-colors hover:border-[var(--primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--primary)]"
+      className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--card-border)] bg-[var(--bg-light)] text-sm font-medium text-[var(--text)] hover:border-[var(--primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--primary)]"
     >
       <Icon className="h-4 w-4" aria-hidden />
     </button>
   );
-}
-
-function buildWeek(start: Date) {
-  return Array.from({ length: 7 }, (_, idx) => addDays(start, idx));
-}
-
-function buildMonthMatrix(visibleDate: Date) {
-  const start = startOfWeek(startOfMonth(visibleDate));
-  const end = endOfWeek(endOfMonth(visibleDate));
-  const days: Date[] = [];
-  for (let cursor = start; cursor <= end; cursor = addDays(cursor, 1)) {
-    days.push(cursor);
-  }
-
-  const matrix: Date[][] = [];
-  for (let i = 0; i < days.length; i += 7) {
-    matrix.push(days.slice(i, i + 7));
-  }
-  return matrix;
-}
-
-function normalizeDate(date: Date) {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function addDays(date: Date, days: number) {
-  const copy = normalizeDate(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
-
-function startOfWeek(date: Date) {
-  const copy = normalizeDate(date);
-  const day = copy.getDay(); // 0 (Sun) -> 6 (Sat)
-  const diff = (day - WEEK_START + 7) % 7;
-  return addDays(copy, -diff);
-}
-
-function endOfWeek(date: Date) {
-  return addDays(startOfWeek(date), 6);
-}
-
-function startOfMonth(date: Date) {
-  const copy = normalizeDate(date);
-  copy.setDate(1);
-  return copy;
-}
-
-function endOfMonth(date: Date) {
-  const copy = startOfMonth(date);
-  copy.setMonth(copy.getMonth() + 1);
-  copy.setDate(0);
-  return normalizeDate(copy);
-}
-
-function shiftMonth(date: Date, delta: number) {
-  const copy = startOfMonth(date);
-  copy.setMonth(copy.getMonth() + delta);
-  return normalizeDate(copy);
-}
-
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function isSameMonth(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-}
-
-function formatMonthYear(date: Date) {
-  return date.toLocaleDateString(undefined, { month: "long", year: "numeric" });
-}
-
-function formatWeekRange(start: Date, end: Date) {
-  const sameMonth = start.getMonth() === end.getMonth();
-  const sameYear = start.getFullYear() === end.getFullYear();
-
-  const startLabel = start.toLocaleDateString(undefined, {
-    month: sameMonth ? "long" : "short",
-    day: "numeric",
-  });
-  const endLabel = end.toLocaleDateString(undefined, {
-    month: sameYear ? "short" : "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  return `${startLabel} – ${endLabel}`;
-}
-
-function formatDay(date: Date) {
-  return date.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function dateKey(date: Date) {
-  const d = normalizeDate(date);
-  const y = d.getFullYear();
-  const m = `${d.getMonth() + 1}`.padStart(2, "0");
-  const day = `${d.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }
