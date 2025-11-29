@@ -24,6 +24,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <main className="flex-1 flex items-center justify-center">
           <LayoutContainer>{children}</LayoutContainer>
         </main>
+        <main className="flex-1 flex items-center justify-center">
+          <LayoutContainer>{children}</LayoutContainer>
+        </main>
         <Footer />
       </body>
     </html>

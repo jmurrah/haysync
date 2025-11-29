@@ -31,6 +31,18 @@ export default function DashboardPage() {
     return null;
   }
 
+  if (!user && loading) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <p>Checking authentication...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="flex justify-center items-center h-full w-full">
       <CalendarList userId={userId} classes="h-full" />
